@@ -17,11 +17,12 @@ namespace NSpec.NUnitAddin
             get { return (Spec) Fixture; }
         }
 
-        public override void RunTestMethod(TestResult testResult)
+        public override TestResult RunTest()
         {
+            var testResult = new TestResult(this);
             using (var runner = new Runner(Spec))
             {
-                var example = runner.Run(() => RunBaseTestMethod(testResult), new TestResultExampleReporter(testResult));
+                var example = runner.Run(() => RunBaseTestMethod(), new TestResultExampleReporter(testResult));
 
                 if (example.IsFail)
                     testResult.Failure(GetTestResultMessageForResultState(testResult, ResultState.Failure, "Failing"), "");
@@ -32,11 +33,12 @@ namespace NSpec.NUnitAddin
                 if (example.IsPending)
                     testResult.Ignore(GetTestResultMessageForResultState(testResult, ResultState.Ignored, "Pending"));
             }
+            return testResult;
         }
 
-        void RunBaseTestMethod(TestResult testResult)
+        void RunBaseTestMethod()
         {
-            base.RunTestMethod(testResult);
+            base.RunTest();
         }
 
         string GetTestResultMessageForResultState(TestResult testResult, ResultState state, string heading)
